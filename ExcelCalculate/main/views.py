@@ -45,13 +45,19 @@ def signin(request):
 def login(request):
     loginEmail = request.POST['loginEmail']
     loginPW = request.POST['loginPW']
-    user = User.objects.get(user_eamil = loginEmail)
-    if user.user_paswword == loginPW:
+    try:
+        user = User.objects.get(user_email = loginEmail)
+    except:
+        return redirect('main_loginFail')
+    if user.user_password == loginPW:
         request.session['user_name'] = user.user_name
         request.session['user_email'] = user.user_email
         return redirect('main_index')
     else:
         return redirect('main_loginFail')
+
+def loginFail(request):
+    return render(request, 'main/loginFail.html')
 
 def logout(request):
     del request.session['user_name']
@@ -80,6 +86,11 @@ def verify(request):
 
 def result(request):
    if 'user_name' in request.session.keys():
-        return render(request, 'main/result.html')
+        content={}
+        content['grade_calculate_dic'] = request.session['grade_calculate_dic']
+        content['email_domain_dic'] = request.session['email_domain_dic']
+        del request.session['grade_calculate_dic']
+        del request.session['email_domain_dic']
+        return render(request, 'main/result.html', content)
    else:
         return redirect('main_signin')
